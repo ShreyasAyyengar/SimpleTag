@@ -1,0 +1,7 @@
+name: SimpleTag
+version: '${project.version}'
+main: me.shreyasayyengar.simpletag.TagPlugin
+api-version: 1.18
+prefix: SimpleTag
+authors: [ ShreyasAyyengar ]
+description: A simple tag minigame (with extra feature)
