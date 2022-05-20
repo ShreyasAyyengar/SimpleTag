@@ -1,14 +1,17 @@
 package me.shreyasayyengar.simpletag;
 
-import me.shreyasayyengar.simpletag.commands.EntityHit;
-import me.shreyasayyengar.simpletag.ev.ProjectileHit;
-import me.shreyasayyengar.simpletag.events.EntityHit;
+import me.shreyasayyengar.simpletag.commands.SetTagCommand;
+import me.shreyasayyengar.simpletag.events.Hit;
+import me.shreyasayyengar.simpletag.events.InventoryClick;
 import me.shreyasayyengar.simpletag.events.Join;
 import me.shreyasayyengar.simpletag.events.Leave;
-import me.shreyasayyengar.simpletag.events.ProjectileHit;
 import me.shreyasayyengar.simpletag.objects.Arena;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import me.shreyasayyengar.simpletag.utils.ConfigManger;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Stream;
 
@@ -27,20 +30,21 @@ public final class TagPlugin extends JavaPlugin {
     }
 
     private void initConfig() {
+        ConfigManger.init(this);
     }
 
     private void registerEvents() {
         Stream.of(
-                new EntityHit(),
-                new ProjectileHit(),
+                new Hit(),
                 new Join(),
-                new Leave()
-        ).forEach(event -> getServer().getPluginManager().registerEvents(event, this);
+                new Leave(),
+                new InventoryClick()
+        ).forEach(event -> getServer().getPluginManager().registerEvents(event, this));
 
     }
 
     private void registerCommands() {
-
+        this.getCommand("simpletag").setExecutor(new SetTagCommand());
     }
 
     @Override
@@ -54,5 +58,18 @@ public final class TagPlugin extends JavaPlugin {
 
     public Arena getArena() {
         return arena;
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+
+        arena.getPlayers().forEach(tagPlayer -> {
+            System.out.println(arena.getPlayers().size());
+            if (tagPlayer.getUUID() == ((Player) sender).getUniqueId()) {
+                tagPlayer.setTagged();
+            }
+        });
+
+        return false;
     }
 }
