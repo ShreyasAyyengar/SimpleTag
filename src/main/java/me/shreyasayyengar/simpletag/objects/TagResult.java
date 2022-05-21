@@ -9,7 +9,6 @@ public enum TagResult {
     TAG_BACK(Util.colourise("&cYou cannot perform tag-backs!")),
     ALREADY_TAGGED(Util.colourise("&6This player is already tagged!")),
     SUCCESS(Util.colourise("&aYou tagged &2&l%player%&r&a!"));
-
     private final String message;
 
     TagResult(String message) {

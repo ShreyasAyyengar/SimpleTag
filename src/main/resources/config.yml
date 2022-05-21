@@ -15,3 +15,5 @@ tag-actions:
 untag-actions:
   - "effect clear {player}"
   - "effect give {player} speed 1000000 2"
+
+virus-mode: false

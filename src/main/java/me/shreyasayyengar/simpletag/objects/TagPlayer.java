@@ -1,5 +1,6 @@
 package me.shreyasayyengar.simpletag.objects;
 
+import me.shreyasayyengar.simpletag.TagPlugin;
 import me.shreyasayyengar.simpletag.utils.ConfigManger;
 import me.shreyasayyengar.simpletag.utils.Util;
 import org.bukkit.Bukkit;
@@ -10,29 +11,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TagPlayer {
 
+    private final HashMap<TagPlayer, TagPlayer> tagBackMap = new HashMap<>();
+
     private final UUID uuid;
-    private TagPlayer lastTaggedBy;
+    private RegisteredTagPair lastTaggedBy;
     private boolean isTagged;
 
     public TagPlayer(UUID uuid) {
         this.uuid = uuid;
         this.isTagged = false;
         this.lastTaggedBy = null;
-    }
-
-    public void setTagged() {
-        handleSetTag(true);
-
-        getPlayer().getWorld().playSound(getPlayer().getLocation(), Sound.ENTITY_SHULKER_BULLET_HIT, 1, 1);
-    }
-
-    public void untagForcefully() {
-        handleSetTag(false);
     }
 
     private void handleSetTag(boolean isTagged) {
@@ -57,66 +52,74 @@ public class TagPlayer {
         }
     }
 
-    public boolean tagPlayer(TagPlayer toTag) {
+    private boolean dictateTagBack(TagPlayer toTag) {
+
+        AtomicBoolean allow = new AtomicBoolean(true);
+
+        RegisteredTagPair.TAG_PAIRS.forEach(pair -> {
+            if (pair.getTagger() == toTag && pair.getVictim() == this) {
+                allow.set(false);
+            }
+        });
+
+        return allow.get();
+    }
+
+    private void clearTagBack() {
+        RegisteredTagPair.TAG_PAIRS.removeIf(pair -> pair.getTagger() == this);
+    }
+
+    public void setTagged() {
+        handleSetTag(true);
+
+        getPlayer().getWorld().playSound(getPlayer().getLocation(), Sound.ENTITY_SHULKER_BULLET_HIT, 1, 1);
+    }
+
+    public void untagForcefully() {
+        handleSetTag(false);
+    }
+
+    public boolean tagPlayer(TagPlayer target) {
 
         boolean success = false;
         TagResult result;
 
         if (!isTagged) {
             result = TagResult.NOT_TAGGED;
-        } else if (toTag.isTagged()) {
+        } else if (target.isTagged()) {
             result = TagResult.ALREADY_TAGGED;
-        } else if (toTag.getLastTaggedBy() == this) {
+        } else if (!dictateTagBack(target)) {
             result = TagResult.TAG_BACK;
         } else {
             result = TagResult.SUCCESS;
         }
 
         if (result == TagResult.SUCCESS) {
-            this.isTagged = false;
-            ConfigManger.getUntaggedCommands(getPlayer()).forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
 
-            ItemStack[] air = {
-                    new ItemStack(Material.AIR),
-                    new ItemStack(Material.AIR),
-                    new ItemStack(Material.AIR),
-                    new ItemStack(Material.AIR)
-            };
+            ConfigManger.getTaggedCommands(target.getPlayer()).forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+            target.getPlayer().sendMessage(Util.colourise("&cYou have been tagged by &6" + Bukkit.getPlayer(uuid).getName() + "&c!"));
+            target.setTagged();
+            clearTagBack();
+            this.lastTaggedBy = new RegisteredTagPair(target, this);
 
-            getPlayer().getInventory().setArmorContents(air);
-
-            // ---------------------------------------------------------------------------------------------------------
-
-            ConfigManger.getTaggedCommands(toTag.getPlayer()).forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
-            toTag.getPlayer().sendMessage(Util.colourise("&cYou have been tagged by &6" + Bukkit.getPlayer(uuid).getName() + "&c!"));
-            toTag.setTagged();
-            toTag.setLastTaggedBy(this);
+            if (!TagPlugin.getInstance().getArena().isVirus) {
+                this.isTagged = false;
+                ConfigManger.getUntaggedCommands(getPlayer()).forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+                ItemStack[] air = {new ItemStack(Material.AIR), new ItemStack(Material.AIR), new ItemStack(Material.AIR), new ItemStack(Material.AIR)};
+                getPlayer().getInventory().setArmorContents(air);
+            }
 
             success = true;
         }
 
-        String s = result.get(getPlayer());
+        String s = result.get(target.getPlayer());
         getPlayer().sendMessage(s);
 
         return success;
     }
 
-    public void runUnsafeActions(Runnable runnable) {
-        if (Bukkit.getPlayer(uuid) != null) {
-            runnable.run();
-        }
-    }
-
     public Player getPlayer() {
         return Bukkit.getPlayer(uuid);
-    }
-
-    public TagPlayer getLastTaggedBy() {
-        return lastTaggedBy;
-    }
-
-    public void setLastTaggedBy(TagPlayer lastTaggedBy) {
-        this.lastTaggedBy = lastTaggedBy;
     }
 
     public boolean isTagged() {

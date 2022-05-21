@@ -23,4 +23,8 @@ public class ConfigManger {
     public static List<String> getUntaggedCommands(Player player) {
         return main.getConfig().getStringList("untag-actions").stream().map(s -> s.replace("{player}", player.getName())).collect(Collectors.toList());
     }
+
+    public static boolean isVirus() {
+        return main.getConfig().getBoolean("virus-mode");
+    }
 }

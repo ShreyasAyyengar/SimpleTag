@@ -10,11 +10,15 @@ public class Join implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        TagPlayer player = new TagPlayer(event.getPlayer().getUniqueId());
-        TagPlugin.getInstance().getArena().addPlayer(player);
 
-        if (event.getPlayer().getName().equalsIgnoreCase("shreyas007")) {
-            player.setTagged();
-        }
+        TagPlugin.getInstance().getArena().getPlayers().forEach(tagPlayer -> {
+
+            boolean alreadyIn = tagPlayer.getUUID().equals(event.getPlayer().getUniqueId());
+
+            if (!alreadyIn) {
+                TagPlayer player = new TagPlayer(event.getPlayer().getUniqueId());
+                TagPlugin.getInstance().getArena().addPlayer(player);
+            }
+        });
     }
 }

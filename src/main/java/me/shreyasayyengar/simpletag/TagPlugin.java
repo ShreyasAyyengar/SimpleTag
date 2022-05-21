@@ -4,7 +4,6 @@ import me.shreyasayyengar.simpletag.commands.SetTagCommand;
 import me.shreyasayyengar.simpletag.events.Hit;
 import me.shreyasayyengar.simpletag.events.InventoryClick;
 import me.shreyasayyengar.simpletag.events.Join;
-import me.shreyasayyengar.simpletag.events.Leave;
 import me.shreyasayyengar.simpletag.objects.Arena;
 import me.shreyasayyengar.simpletag.utils.ConfigManger;
 import org.bukkit.command.Command;
@@ -37,7 +36,6 @@ public final class TagPlugin extends JavaPlugin {
         Stream.of(
                 new Hit(),
                 new Join(),
-                new Leave(),
                 new InventoryClick()
         ).forEach(event -> getServer().getPluginManager().registerEvents(event, this));
 

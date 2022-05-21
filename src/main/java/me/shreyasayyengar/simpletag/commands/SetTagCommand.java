@@ -24,16 +24,16 @@ public class SetTagCommand implements CommandExecutor {
         }
 
         if (args.length != 2) {
-            player.sendMessage("&cUsage: /tagger <add|subtract> <player>");
+            player.sendMessage(Util.colourise("&cUsage: /tagger <add|remove> <player>"));
             return false;
         }
 
         if (!args[0].equalsIgnoreCase("add") && !args[0].equalsIgnoreCase("subtract")) {
-            player.sendMessage("&cUsage: /tagger <add|subtract> <player>");
+            player.sendMessage("&cUsage: /tagger <add|remove> <player>");
             return false;
         }
 
-        Player target = Bukkit.getPlayer(args[0]);
+        Player target = Bukkit.getPlayer(args[1]);
 
         if (target == null) {
             player.sendMessage("&cThat player is not online!");
@@ -50,7 +50,7 @@ public class SetTagCommand implements CommandExecutor {
                 player.sendMessage(Util.colourise("&aYou have tagged &e" + target.getName()));
             }
 
-            case "subtract" -> {
+            case "remove" -> {
                 TagPlugin.getInstance().getArena().getPlayers().forEach(tagPlayer -> {
                     if (tagPlayer.getUUID().equals(target.getUniqueId())) {
                         tagPlayer.untagForcefully();
