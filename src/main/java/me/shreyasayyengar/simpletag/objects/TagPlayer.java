@@ -11,14 +11,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import java.util.HashMap;
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TagPlayer {
-
-    private final HashMap<TagPlayer, TagPlayer> tagBackMap = new HashMap<>();
 
     private final UUID uuid;
     private RegisteredTagPair lastTaggedBy;
@@ -38,7 +36,7 @@ public class TagPlayer {
                     new ItemStack(Material.LEATHER_BOOTS),
                     new ItemStack(Material.LEATHER_LEGGINGS),
                     new ItemStack(Material.LEATHER_CHESTPLATE),
-                    new ItemStack(Material.LEATHER_HELMET)
+                    new ItemStack(Material.AIR)
             };
 
             LeatherArmorMeta meta = (LeatherArmorMeta) armor[0].getItemMeta();
@@ -49,6 +47,11 @@ public class TagPlayer {
             }
 
             getPlayer().getInventory().setArmorContents(armor);
+        }
+
+        if (!isTagged) {
+            ItemStack[] air = {new ItemStack(Material.AIR), new ItemStack(Material.AIR), new ItemStack(Material.AIR), new ItemStack(Material.AIR)};
+            getPlayer().getInventory().setArmorContents(air);
         }
     }
 
@@ -79,7 +82,7 @@ public class TagPlayer {
         handleSetTag(false);
     }
 
-    public boolean tagPlayer(TagPlayer target) {
+    public boolean tagPlayer(@Nullable TagPlayer target) {
 
         boolean success = false;
         TagResult result;

@@ -20,16 +20,17 @@ public class SetTagCommand implements CommandExecutor {
         }
 
         if (!player.hasPermission("simpletag.set")) {
+            player.sendMessage(Util.colourise("&cYou do not have permission to execute this command"));
             return false;
         }
 
         if (args.length != 2) {
-            player.sendMessage(Util.colourise("&cUsage: /tagger <add|remove> <player>"));
+            player.sendMessage(Util.colourise("&cUsage: /simpletag <add|remove> <player>"));
             return false;
         }
 
-        if (!args[0].equalsIgnoreCase("add") && !args[0].equalsIgnoreCase("subtract")) {
-            player.sendMessage("&cUsage: /tagger <add|remove> <player>");
+        if (!args[0].equalsIgnoreCase("add") && !args[0].equalsIgnoreCase("remove")) {
+            player.sendMessage("&cUsage: /simpletag <add|remove> <player>");
             return false;
         }
 
@@ -47,7 +48,7 @@ public class SetTagCommand implements CommandExecutor {
                         tagPlayer.setTagged();
                     }
                 });
-                player.sendMessage(Util.colourise("&aYou have tagged &e" + target.getName()));
+                player.sendMessage(Util.colourise("&aForcefully tagged &e" + target.getName() + "&a."));
             }
 
             case "remove" -> {
@@ -59,10 +60,6 @@ public class SetTagCommand implements CommandExecutor {
                 player.sendMessage(Util.colourise("&aYou have untagged " + target.getName()));
             }
         }
-
-        TagPlugin.getInstance().getArena().getPlayer(target.getUniqueId()).setTagged();
-        player.sendMessage(Util.colourise("&aForcefully tagged &e" + target.getName() + "&a."));
-
 
         return false;
     }
